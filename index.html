@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>WhatsApp Web UI</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">WA</div>
+                <div>
+                    <h1>WhatsApp Web UI</h1>
+                    <p id="connectionBadge" class="badge">Connecting…</p>
+                </div>
+            </div>
+
+            <div class="search-wrap">
+                <input id="searchInput" type="text" placeholder="Search chats" autocomplete="off" />
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <span>Chats</span>
+                    <span id="chatCount" class="muted">0</span>
+                </div>
+                <div id="chatList" class="chat-list"></div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <section id="qrView" class="qr-view">
+                <div class="qr-card">
+                    <div class="qr-header">
+                        <div>
+                            <h2>Link your WhatsApp</h2>
+                            <p>Scan the QR code with WhatsApp → Linked devices.</p>
+                        </div>
+                        <span id="qrState" class="badge">Waiting</span>
+                    </div>
+
+                    <div class="qr-frame">
+                        <img id="qrImage" alt="WhatsApp QR code" />
+                        <div id="qrPlaceholder" class="qr-placeholder">
+                            QR will appear here
+                        </div>
+                    </div>
+
+                    <div class="qr-footer">
+                        <div class="step">
+                            <strong>1</strong>
+                            <span>Open WhatsApp</span>
+                        </div>
+                        <div class="step">
+                            <strong>2</strong>
+                            <span>Go to Linked Devices</span>
+                        </div>
+                        <div class="step">
+                            <strong>3</strong>
+                            <span>Scan QR</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="chatView" class="chat-view hidden">
+                <header class="chat-topbar">
+                    <div class="chat-title">
+                        <div class="avatar" id="chatAvatar">WA</div>
+                        <div>
+                            <h2 id="activeChatName">Select a chat</h2>
+                            <p id="activeChatMeta">Ready</p>
+                        </div>
+                    </div>
+
+                    <div class="chat-actions">
+                        <span id="onlineStatus" class="status-dot">Offline</span>
+                    </div>
+                </header>
+
+                <div id="messageList" class="message-list"></div>
+
+                <form id="composer" class="composer">
+                    <button type="button" class="icon-btn" title="Attach disabled">＋</button>
+                    <input id="messageInput" type="text" placeholder="Type a message" autocomplete="off" />
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
