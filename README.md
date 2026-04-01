@@ -1,4 +1,4 @@
-# 🚀 Project Deployment Guide
+#  Project Deployment Guide
 
 Welcome to this project! Easily deploy using the platforms below.
 
@@ -9,7 +9,7 @@ Welcome to this project! Easily deploy using the platforms below.
 ### 🚀 Deploy to Render
 [![Deploy to Render](https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com/)
 
-#### 📌 STEPS ON HOW TO DEPLOY
+####  STEPS ON HOW TO DEPLOY
 Steps will be uploaded shortly by the developer.
 
 ---
@@ -17,7 +17,7 @@ Steps will be uploaded shortly by the developer.
 ### ☁️ Deploy to Koyeb
 [![Deploy to Koyeb](https://img.shields.io/badge/Deploy-Koyeb-121212?style=for-the-badge&logo=koyeb&logoColor=white)](https://www.koyeb.com/)
 
-#### 📌 STEPS ON HOW TO DEPLOY
+####  STEPS ON HOW TO DEPLOY
 Steps will be uploaded shortly by the developer.
 
 ---
@@ -25,7 +25,7 @@ Steps will be uploaded shortly by the developer.
 ### 🟣 Deploy to Heroku
 [![Deploy to Heroku](https://img.shields.io/badge/Deploy-Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white)](https://heroku.com/)
 
-#### 📌 STEPS ON HOW TO DEPLOY
+####  STEPS ON HOW TO DEPLOY
 Steps will be uploaded shortly by the developer.
 
 ---
