@@ -7,9 +7,7 @@ Welcome to this project! Easily deploy using the platforms below.
 ## 🌐 Deploy Options
 
 ### 🚀 Deploy to Render
-<a href="https://render.com/" target="_blank">
-  <img src="https://www.svgrepo.com/show/354292/render.svg" width="120" />
-</a>
+[![Deploy to Render](https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com/)
 
 #### 📌 STEPS ON HOW TO DEPLOY
 Steps will be uploaded shortly by the developer.
@@ -17,9 +15,7 @@ Steps will be uploaded shortly by the developer.
 ---
 
 ### ☁️ Deploy to Koyeb
-<a href="https://www.koyeb.com/" target="_blank">
-  <img src="https://www.svgrepo.com/show/473809/koyeb.svg" width="120" />
-</a>
+[![Deploy to Koyeb](https://img.shields.io/badge/Deploy-Koyeb-121212?style=for-the-badge&logo=koyeb&logoColor=white)](https://www.koyeb.com/)
 
 #### 📌 STEPS ON HOW TO DEPLOY
 Steps will be uploaded shortly by the developer.
@@ -27,9 +23,7 @@ Steps will be uploaded shortly by the developer.
 ---
 
 ### 🟣 Deploy to Heroku
-<a href="https://heroku.com/" target="_blank">
-  <img src="https://www.svgrepo.com/show/353804/heroku-icon.svg" width="120" />
-</a>
+[![Deploy to Heroku](https://img.shields.io/badge/Deploy-Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white)](https://heroku.com/)
 
 #### 📌 STEPS ON HOW TO DEPLOY
 Steps will be uploaded shortly by the developer.
@@ -38,9 +32,7 @@ Steps will be uploaded shortly by the developer.
 
 ## 📞 CONTACT THE DEVELOPER
 
-<a href="https://wa.me/254796780678" target="_blank">
-  <img src="https://www.svgrepo.com/show/303147/whatsapp-icon-logo.svg" width="80" />
-</a>
+[![WhatsApp](https://img.shields.io/badge/Contact-WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/254796780678)
 
 ---
 
