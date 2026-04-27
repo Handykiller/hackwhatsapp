@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp Web Portal</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <!--div class="logo">Wff</div-->
+                <div>
+                    <h2>WhatsApp Hack</h2>
+                    <p id="statusText">Connecting...</p>
+                </div>
+            </div>
+
+            <div class="card qr-card">
+                <div class="card-head">
+                    <h3>QR Login</h3>
+                    <button id="refreshQrBtn" type="button" class="ghost-btn">Refresh</button>
+                </div>
+
+                <div class="qr-box">
+                    <img id="qrImage" alt="WhatsApp QR code" />
+                    <div id="qrPlaceholder" class="qr-placeholder">Waiting for QR...</div>
+                </div>
+
+                <p class="muted" id="qrHelp">Scan this in WhatsApp → Linked devices</p>
+            </div>
+
+            <div class="card">
+                <h3>Chats</h3>
+                <input id="chatSearch" class="search" type="text" placeholder="Search chats..." />
+                <div id="chatList" class="chat-list"></div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div>
+                    <h1 id="chatTitle">Select a chat</h1>
+                    <p id="chatMeta">Ready for messaging</p>
+                </div>
+                <div class="pill" id="connectionPill">Offline</div>
+            </header>
+
+            <section id="messageArea" class="messages">
+                <div class="empty-state">Choose a chat from the left to load messages.</div>
+            </section>
+
+            <form id="messageForm" class="composer">
+                <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" />
+                <button type="submit">Send</button>
+            </form>
+        </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
