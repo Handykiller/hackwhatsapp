@@ -272,7 +272,7 @@ const manualRefreshBtn = document.getElementById('manualRefreshBtn');
 const chatSearch = document.getElementById('chatSearch');
 const chatList = document.getElementById('chatList');
 
-const chatListView = document.getElementById('chatListView');
+const listView = document.getElementById('listView');
 const chatView = document.getElementById('chatView');
 const backBtn = document.getElementById('backBtn');
 
@@ -283,14 +283,12 @@ const messageArea = document.getElementById('messageArea');
 
 const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
-const fabBtn = document.getElementById('fabBtn');
 
 let allChats = [];
 let activeChat = null;
 let isReady = false;
 let chatPollTimer = null;
 let qrPollTimer = null;
-let hasShownLoggedIn = false;
 
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -306,12 +304,6 @@ function initials(name) {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-function timeLabel(timestamp) {
-  if (!timestamp) return '';
-  const str = String(timestamp);
-  return str.length >= 5 ? str.slice(0, 5) : str;
-}
-
 function setConnection(ready, text) {
   isReady = !!ready;
   statusText.textContent = text || (ready ? 'Connected and ready' : 'Connecting...');
@@ -319,12 +311,10 @@ function setConnection(ready, text) {
 
   if (ready) {
     qrPanel.classList.add('hidden-panel');
-    if (!hasShownLoggedIn) {
-      qrPlaceholder.textContent = 'Logged in';
-      qrHelp.textContent = 'Account connected successfully';
-      hasShownLoggedIn = true;
-    }
     qrImage.style.display = 'none';
+    qrPlaceholder.style.display = 'grid';
+    qrPlaceholder.textContent = 'Logged in';
+    qrHelp.textContent = 'Account connected successfully';
   } else {
     qrPanel.classList.remove('hidden-panel');
   }
@@ -332,11 +322,11 @@ function setConnection(ready, text) {
 
 function setView(view) {
   if (view === 'chat') {
-    chatListView.classList.add('hidden');
+    listView.classList.add('hidden');
     chatView.classList.add('show');
   } else {
     chatView.classList.remove('show');
-    chatListView.classList.remove('hidden');
+    listView.classList.remove('hidden');
   }
 }
 
@@ -370,7 +360,7 @@ function renderChats() {
       <div class="chat-info">
         <div class="chat-name-row">
           <div class="chat-name">${escapeHtml(chat.name)}</div>
-          <div class="chat-time">${escapeHtml(timeLabel(chat.timestamp))}</div>
+          <div class="chat-time">${escapeHtml(String(chat.timestamp || '').slice(0, 5))}</div>
         </div>
         <div class="chat-preview">${escapeHtml(chat.lastMessage || 'No messages yet')}</div>
       </div>
@@ -406,11 +396,9 @@ function renderMessages(messages) {
 async function loadChats(silent = false) {
   try {
     if (!silent) {
-      if (!isReady) {
-        chatList.innerHTML = '<div class="empty-state">Connecting to your account...</div>';
-      } else if (!allChats.length) {
-        chatList.innerHTML = '<div class="empty-state">Syncing chats...</div>';
-      }
+      chatList.innerHTML = isReady
+        ? '<div class="empty-state">Syncing chats...</div>'
+        : '<div class="empty-state">Connecting to your account...</div>';
     }
 
     const res = await fetch(`${API_BASE}/api/chats`);
@@ -419,17 +407,7 @@ async function loadChats(silent = false) {
     if (data.ok) {
       isReady = !!data.ready;
       allChats = Array.isArray(data.chats) ? data.chats : [];
-
-      if (isReady && !allChats.length) {
-        chatList.innerHTML = '<div class="empty-state">Syncing chats...</div>';
-      }
-
       renderChats();
-
-      if (activeChat) {
-        const updated = allChats.find((c) => c.id === activeChat.id);
-        if (updated) activeChat = updated;
-      }
     }
   } catch (error) {
     if (!silent) {
@@ -466,29 +444,16 @@ async function selectChat(chat) {
   renderChats();
 }
 
-function stopPolling() {
-  if (chatPollTimer) clearInterval(chatPollTimer);
-  if (qrPollTimer) clearInterval(qrPollTimer);
-  chatPollTimer = null;
-  qrPollTimer = null;
-}
-
 function startChatPolling() {
   if (chatPollTimer) clearInterval(chatPollTimer);
-
-  const poll = async () => {
-    if (!isReady) return;
-    await loadChats(true);
-  };
-
-  chatPollTimer = setInterval(poll, 3000);
-  poll();
+  chatPollTimer = setInterval(() => {
+    if (isReady) loadChats(true);
+  }, 3000);
 }
 
 function startQrPolling() {
   if (qrPollTimer) clearInterval(qrPollTimer);
-
-  const poll = async () => {
+  qrPollTimer = setInterval(async () => {
     if (isReady) return;
 
     try {
@@ -501,16 +466,9 @@ function startQrPolling() {
         qrPlaceholder.style.display = 'none';
         qrHelp.textContent = 'Scan this QR in WhatsApp → Linked devices';
         qrPanel.classList.remove('hidden-panel');
-      } else {
-        qrImage.style.display = 'none';
-        qrPlaceholder.style.display = 'grid';
-        qrPlaceholder.textContent = 'Waiting for QR...';
       }
     } catch (error) {}
-  };
-
-  qrPollTimer = setInterval(poll, 4000);
-  poll();
+  }, 4000);
 }
 
 messageForm.addEventListener('submit', async (e) => {
@@ -548,48 +506,34 @@ messageForm.addEventListener('submit', async (e) => {
 chatSearch.addEventListener('input', renderChats);
 
 refreshQrBtn.addEventListener('click', async () => {
+  if (isReady) return;
+
   try {
     const res = await fetch(`${API_BASE}/api/qr`);
     const data = await res.json();
-
-    if (data.qrDataUrl && !isReady) {
+    if (data.qrDataUrl) {
       qrImage.src = data.qrDataUrl;
       qrImage.style.display = 'block';
       qrPlaceholder.style.display = 'none';
       qrPanel.classList.remove('hidden-panel');
-      qrHelp.textContent = 'Scan this QR in WhatsApp → Linked devices';
     }
   } catch (error) {}
 });
 
-manualRefreshBtn.addEventListener('click', () => {
-  loadChats(false);
-});
+manualRefreshBtn.addEventListener('click', () => loadChats(false));
 
 backBtn.addEventListener('click', () => {
   activeChat = null;
   setView('list');
 });
 
-fabBtn.addEventListener('click', () => {
-  setView('list');
-  chatSearch.focus();
-});
-
 socket.on('wa-status', (data) => {
   setConnection(!!data.ready, data.text || 'Connecting...');
 
   if (data.ready) {
-    qrImage.style.display = 'none';
-    qrPlaceholder.style.display = 'grid';
-    qrPlaceholder.textContent = 'Logged in';
-    qrHelp.textContent = 'Account connected successfully';
-    qrPanel.classList.add('hidden-panel');
-
     startChatPolling();
     loadChats(true);
   } else {
-    qrPanel.classList.remove('hidden-panel');
     startQrPolling();
   }
 });
@@ -601,7 +545,6 @@ socket.on('wa-qr', (data) => {
     qrImage.src = data.qrDataUrl;
     qrImage.style.display = 'block';
     qrPlaceholder.style.display = 'none';
-    qrHelp.textContent = 'Scan this QR in WhatsApp → Linked devices';
     qrPanel.classList.remove('hidden-panel');
   } else {
     qrImage.style.display = 'none';
@@ -634,8 +577,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   startQrPolling();
 
   setInterval(() => {
-    if (isReady) {
-      loadChats(true);
-    }
+    if (isReady) loadChats(true);
   }, 5000);
 });
