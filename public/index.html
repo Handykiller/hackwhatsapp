@@ -1,67 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WhatsApp Web Portal</title>
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>WhatsApp Portal</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-    <div class="app">
-        <aside class="sidebar">
-            <div class="brand">
-                <!--div class="logo">Wff</div-->
-                <div>
-                    <h2>WhatsApp Hack</h2>
-                    <p id="statusText">Connecting...</p>
-                </div>
-            </div>
+  <div class="desktop-warning">
+    <div class="desktop-card">
+      <h1>Mobile Interface Only</h1>
+      <p>This interface is designed for Android-sized screens.</p>
+    </div>
+  </div>
 
-            <div class="card qr-card">
-                <div class="card-head">
-                    <h3>QR Login</h3>
-                    <button id="refreshQrBtn" type="button" class="ghost-btn">Refresh</button>
-                </div>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="top-left">
+        <h1>WhatsApp</h1>
+      </div>
+      <div class="top-right">
+        <button class="icon-btn" type="button" aria-label="Camera">⌁</button>
+        <button class="icon-btn" type="button" aria-label="Menu">⋮</button>
+      </div>
+    </header>
 
-                <div class="qr-box">
-                    <img id="qrImage" alt="WhatsApp QR code" />
-                    <div id="qrPlaceholder" class="qr-placeholder">Waiting for QR...</div>
-                </div>
-
-                <p class="muted" id="qrHelp">Scan this in WhatsApp → Linked devices</p>
-            </div>
-
-            <div class="card">
-                <h3>Chats</h3>
-                <input id="chatSearch" class="search" type="text" placeholder="Search chats..." />
-                <div id="chatList" class="chat-list"></div>
-            </div>
-        </aside>
-
-        <main class="main">
-            <header class="topbar">
-                <div>
-                    <h1 id="chatTitle">Select a chat</h1>
-                    <p id="chatMeta">Ready for messaging</p>
-                </div>
-                <div class="pill" id="connectionPill">Offline</div>
-            </header>
-
-            <section id="messageArea" class="messages">
-                <div class="empty-state">Choose a chat from the left to load messages.</div>
-            </section>
-
-            <form id="messageForm" class="composer">
-                <input id="messageInput" type="text" placeholder="Type a message..." autocomplete="off" />
-                <button type="submit">Send</button>
-            </form>
-        </main>
+    <div class="search-row">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input id="chatSearch" type="text" placeholder="Ask Meta AI or Search" />
+      </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="script.js"></script>
-</body>
+    <div class="tabs">
+      <button class="tab active">
+        Chats <span id="unreadBadge" class="tab-badge">0</span>
+      </button>
+      <button class="tab">Updates</button>
+      <button class="tab">Communities</button>
+      <button class="tab">Calls</button>
+    </div>
 
+    <main class="content">
+      <section id="chatListView" class="view list-view">
+        <div class="session-card" id="sessionCard">
+          <div class="session-head">
+            <div>
+              <div class="session-title">Connection</div>
+              <div id="statusText" class="session-subtitle">Connecting...</div>
+            </div>
+            <div id="connectionDot" class="dot offline"></div>
+          </div>
+
+          <div id="qrPanel" class="qr-panel">
+            <div class="qr-head">
+              <span>QR Login</span>
+              <button id="refreshQrBtn" type="button" class="link-btn">Refresh</button>
+            </div>
+
+            <div class="qr-frame">
+              <img id="qrImage" alt="WhatsApp QR code" />
+              <div id="qrPlaceholder" class="qr-placeholder">Waiting for QR...</div>
+            </div>
+
+            <div id="qrHelp" class="qr-help">Scan this QR in WhatsApp → Linked devices</div>
+          </div>
+        </div>
+
+        <div class="list-head">
+          <span>Chats</span>
+          <button id="manualRefreshBtn" class="link-btn" type="button">Refresh</button>
+        </div>
+
+        <div id="chatList" class="chat-list"></div>
+      </section>
+
+      <section id="chatView" class="view chat-view hidden">
+        <div class="chat-header">
+          <button id="backBtn" class="back-btn" type="button">←</button>
+
+          <div class="chat-profile">
+            <div id="chatAvatar" class="avatar">WA</div>
+            <div class="chat-title-wrap">
+              <h2 id="chatTitle">Chat</h2>
+              <p id="chatMeta">Tap a chat</p>
+            </div>
+          </div>
+
+          <div class="chat-actions">
+            <button class="icon-btn" type="button" aria-label="Call">⌁</button>
+            <button class="icon-btn" type="button" aria-label="Menu">⋮</button>
+          </div>
+        </div>
+
+        <div id="messageArea" class="message-area">
+          <div class="empty-state">Choose a chat to view messages.</div>
+        </div>
+
+        <form id="messageForm" class="composer">
+          <button class="composer-btn" type="button">☺</button>
+          <input
+            id="messageInput"
+            type="text"
+            placeholder="Message"
+            autocomplete="off"
+          />
+          <button class="composer-btn" type="button">📎</button>
+          <button class="composer-btn" type="button">📷</button>
+          <button class="send-btn" type="submit">➤</button>
+        </form>
+      </section>
+    </main>
+
+    <button id="fabBtn" class="fab" type="button">＋</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
 </html>
