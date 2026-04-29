@@ -1,1 +1,641 @@
-const _0x5bdf52=_0x499d;function _0x33a1(){const _0x544431=['style','<div\x20class=\x22empty-state\x22>No\x20messages\x20in\x20this\x20chat.</div>','messages','rgba(255,255,255,0.08)','statusText','length','<div\x20class=\x22badge\x22>','includes','value','/api/chats','Waiting\x20for\x20QR...','Chat','click','block','chatList','color','</div>\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22chat-info\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<strong>','<div\x20class=\x22muted\x22>Chats\x20are\x20still\x20syncing.\x20Wait\x20a\x20few\x20seconds\x20and\x20refresh.</div>','Connected','Connected.\x20Waiting\x20for\x20chat\x20sync...','6294ekdTKc','appendChild','\x0a\x20\x20\x20\x20\x20\x20<div>','14588199bnYQau','POST','\x0a\x20\x20\x20\x20\x20\x20<div\x20class=\x22avatar\x22>','ready','No\x20messages\x20yet','grid','active','message','toLowerCase','messageArea','509659sVorbN','Message\x20','2jWvfAt','qrDataUrl','textContent','Offline','chatSearch','Logged\x20in','Connecting...','time','div','Scan\x20this\x20QR\x20in\x20WhatsApp\x20>\x20Linked\x20devices','scrollHeight','chatTitle','http://localhost:3000','Online','placeholder','chatMeta','chat-item\x20','<div\x20class=\x22muted\x22>Failed\x20to\x20load\x20chats.</div>','7ZJfhrq','text','src','toUpperCase','input','unreadCount','Private\x20chat','<div\x20class=\x22empty-state\x22>Could\x20not\x20load\x20messages.</div>','preventDefault','stringify','3387615isPJCI','7485ABJdgX','wa-status','scrollTop','innerHTML','none','body','trim','Message\x20failed.','application/json','name','lastMessage','</div>\x0a\x20\x20\x20\x20\x20\x20<span\x20class=\x22time\x22>','display','msg\x20','filter','wa-qr','forEach','addEventListener','split','background','createElement','3726752SlhGDM','slice','wa-chats','messageInput','chats','1085596eNMYNF','Select\x20a\x20chat\x20first.','qrHelp','json','getElementById','className','#e9edef','/api/messages/','#7dffb2','/api/qr','18004190QhwsOh'];_0x33a1=function(){return _0x544431;};return _0x33a1();}(function(_0x206fcc,_0x5305f6){const _0x18d358=_0x499d,_0x8d6cc2=_0x206fcc();while(!![]){try{const _0x3167ac=-parseInt(_0x18d358(0x1a7))/0x1+parseInt(_0x18d358(0x1a9))/0x2*(-parseInt(_0x18d358(0x1c5))/0x3)+parseInt(_0x18d358(0x17b))/0x4+parseInt(_0x18d358(0x1c6))/0x5*(parseInt(_0x18d358(0x19a))/0x6)+-parseInt(_0x18d358(0x1bb))/0x7*(-parseInt(_0x18d358(0x176))/0x8)+-parseInt(_0x18d358(0x19d))/0x9+parseInt(_0x18d358(0x185))/0xa;if(_0x3167ac===_0x5305f6)break;else _0x8d6cc2['push'](_0x8d6cc2['shift']());}catch(_0x4e1f7f){_0x8d6cc2['push'](_0x8d6cc2['shift']());}}}(_0x33a1,0xcf170));const API_BASE=_0x5bdf52(0x1b5),socket=io(API_BASE),statusText=document['getElementById'](_0x5bdf52(0x18a)),connectionPill=document['getElementById']('connectionPill'),qrImage=document[_0x5bdf52(0x17f)]('qrImage'),qrPlaceholder=document[_0x5bdf52(0x17f)]('qrPlaceholder'),qrHelp=document[_0x5bdf52(0x17f)](_0x5bdf52(0x17d)),refreshQrBtn=document[_0x5bdf52(0x17f)]('refreshQrBtn'),chatSearch=document[_0x5bdf52(0x17f)](_0x5bdf52(0x1ad)),chatList=document[_0x5bdf52(0x17f)](_0x5bdf52(0x194)),chatTitle=document[_0x5bdf52(0x17f)](_0x5bdf52(0x1b4)),chatMeta=document['getElementById'](_0x5bdf52(0x1b8)),messageArea=document[_0x5bdf52(0x17f)](_0x5bdf52(0x1a6)),messageForm=document['getElementById']('messageForm'),messageInput=document[_0x5bdf52(0x17f)](_0x5bdf52(0x179));let allChats=[],activeChat=null,lastReadyState=![];function setStatus(_0x462565,_0x12304e){const _0x552032=_0x5bdf52;statusText[_0x552032(0x1ab)]=_0x462565,connectionPill[_0x552032(0x1ab)]=_0x12304e?_0x552032(0x1b6):_0x552032(0x1ac),connectionPill['style'][_0x552032(0x174)]=_0x12304e?'rgba(37,\x20211,\x20102,\x200.12)':_0x552032(0x189),connectionPill[_0x552032(0x186)][_0x552032(0x195)]=_0x12304e?_0x552032(0x183):_0x552032(0x181),_0x12304e&&(qrImage[_0x552032(0x186)]['display']=_0x552032(0x1ca),qrPlaceholder[_0x552032(0x186)][_0x552032(0x1d2)]=_0x552032(0x1a2),qrPlaceholder[_0x552032(0x1ab)]=_0x552032(0x1ae),qrHelp[_0x552032(0x1ab)]='Account\x20connected\x20successfully');}function initials(_0x4538bf){const _0x216728=_0x5bdf52,_0x2037ca=String(_0x4538bf||_0x216728(0x191))[_0x216728(0x1cc)](),_0x16ea9a=_0x2037ca[_0x216728(0x173)]('\x20')[_0x216728(0x1d4)](Boolean);if(_0x16ea9a[_0x216728(0x18b)]===0x0)return'C';if(_0x16ea9a[_0x216728(0x18b)]===0x1)return _0x16ea9a[0x0][_0x216728(0x177)](0x0,0x2)[_0x216728(0x1be)]();return(_0x16ea9a[0x0][0x0]+_0x16ea9a[0x1][0x0])[_0x216728(0x1be)]();}function escapeHtml(_0xb26997){const _0x24cb12=_0x5bdf52,_0x2abcbe=document[_0x24cb12(0x175)](_0x24cb12(0x1b1));return _0x2abcbe['textContent']=_0xb26997,_0x2abcbe[_0x24cb12(0x1c9)];}function _0x499d(_0x4c0fec,_0x4e75c1){_0x4c0fec=_0x4c0fec-0x171;const _0x33a153=_0x33a1();let _0x499ddc=_0x33a153[_0x4c0fec];return _0x499ddc;}function renderChats(){const _0xe6be8a=_0x5bdf52,_0x38bf1e=chatSearch['value'][_0xe6be8a(0x1cc)]()['toLowerCase'](),_0x2b4927=allChats[_0xe6be8a(0x1d4)](_0x53dca0=>{const _0x51bdb0=_0xe6be8a,_0x5d845a=(_0x53dca0[_0x51bdb0(0x1cf)]+'\x20'+_0x53dca0[_0x51bdb0(0x1d0)])[_0x51bdb0(0x1a5)]();return _0x5d845a[_0x51bdb0(0x18d)](_0x38bf1e);});chatList['innerHTML']='';if(!_0x2b4927[_0xe6be8a(0x18b)]){chatList[_0xe6be8a(0x1c9)]=lastReadyState?_0xe6be8a(0x197):'<div\x20class=\x22muted\x22>No\x20chats\x20found.</div>';return;}_0x2b4927['forEach'](_0x47dd55=>{const _0xd3341f=_0xe6be8a,_0x403206=document[_0xd3341f(0x175)](_0xd3341f(0x1b1));_0x403206[_0xd3341f(0x180)]=_0xd3341f(0x1b9)+(activeChat?.['id']===_0x47dd55['id']?_0xd3341f(0x1a3):''),_0x403206[_0xd3341f(0x1c9)]=_0xd3341f(0x19f)+initials(_0x47dd55[_0xd3341f(0x1cf)])+_0xd3341f(0x196)+escapeHtml(_0x47dd55[_0xd3341f(0x1cf)])+'</strong>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<p>'+escapeHtml(_0x47dd55[_0xd3341f(0x1d0)]||_0xd3341f(0x1a1))+'</p>\x0a\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20'+(_0x47dd55[_0xd3341f(0x1c0)]?_0xd3341f(0x18c)+_0x47dd55['unreadCount']+'</div>':'')+'\x0a\x20\x20\x20\x20',_0x403206[_0xd3341f(0x172)]('click',()=>selectChat(_0x47dd55)),chatList[_0xd3341f(0x19b)](_0x403206);});}function renderMessages(_0x3fd47c){const _0x125e37=_0x5bdf52;messageArea[_0x125e37(0x1c9)]='';if(!_0x3fd47c||!_0x3fd47c[_0x125e37(0x18b)]){messageArea['innerHTML']=_0x125e37(0x187);return;}_0x3fd47c[_0x125e37(0x171)](_0x40bf7d=>{const _0x41f1a2=_0x125e37,_0x1d1c1f=document[_0x41f1a2(0x175)]('div');_0x1d1c1f['className']=_0x41f1a2(0x1d3)+(_0x40bf7d['fromMe']?'me':'other'),_0x1d1c1f[_0x41f1a2(0x1c9)]=_0x41f1a2(0x19c)+escapeHtml(_0x40bf7d[_0x41f1a2(0x1cb)]||'')+_0x41f1a2(0x1d1)+(_0x40bf7d[_0x41f1a2(0x1b0)]||'')+'</span>\x0a\x20\x20\x20\x20',messageArea[_0x41f1a2(0x19b)](_0x1d1c1f);}),messageArea[_0x125e37(0x1c8)]=messageArea[_0x125e37(0x1b3)];}async function loadChats(){const _0x304fc4=_0x5bdf52;try{const _0x224141=await fetch(API_BASE+_0x304fc4(0x18f)),_0x4a15af=await _0x224141[_0x304fc4(0x17e)]();_0x4a15af['ok']&&(lastReadyState=!!_0x4a15af[_0x304fc4(0x1a0)],allChats=_0x4a15af[_0x304fc4(0x17a)]||[],renderChats(),lastReadyState&&allChats[_0x304fc4(0x18b)]===0x0&&setStatus(_0x304fc4(0x199),!![]));}catch(_0xf03fc8){chatList[_0x304fc4(0x1c9)]=_0x304fc4(0x1ba);}}async function loadMessages(_0x1ee49f){const _0x2837dd=_0x5bdf52;try{const _0x407a55=await fetch(API_BASE+_0x2837dd(0x182)+encodeURIComponent(_0x1ee49f)),_0x488568=await _0x407a55['json']();_0x488568['ok']?renderMessages(_0x488568[_0x2837dd(0x188)]||[]):messageArea[_0x2837dd(0x1c9)]=_0x2837dd(0x1c2);}catch(_0x2fd67d){messageArea['innerHTML']=_0x2837dd(0x1c2);}}async function selectChat(_0x13ad01){const _0x1d07ac=_0x5bdf52;activeChat=_0x13ad01,chatTitle[_0x1d07ac(0x1ab)]=_0x13ad01['name'],chatMeta[_0x1d07ac(0x1ab)]=_0x13ad01['isGroup']?'Group\x20chat':_0x1d07ac(0x1c1),messageInput[_0x1d07ac(0x1b7)]=_0x1d07ac(0x1a8)+_0x13ad01['name'],await loadMessages(_0x13ad01['id']),renderChats();}messageForm['addEventListener']('submit',async _0x2ec62e=>{const _0x418835=_0x5bdf52;_0x2ec62e[_0x418835(0x1c3)]();if(!activeChat){alert(_0x418835(0x17c));return;}const _0x6b14c6=messageInput[_0x418835(0x18e)][_0x418835(0x1cc)]();if(!_0x6b14c6)return;try{const _0x3aa168=await fetch(API_BASE+'/api/send',{'method':_0x418835(0x19e),'headers':{'Content-Type':_0x418835(0x1ce)},'body':JSON[_0x418835(0x1c4)]({'chatId':activeChat['id'],'text':_0x6b14c6})}),_0x5a0357=await _0x3aa168[_0x418835(0x17e)]();_0x5a0357['ok']?(messageInput[_0x418835(0x18e)]='',await loadMessages(activeChat['id']),await loadChats()):alert(_0x5a0357[_0x418835(0x1a4)]||_0x418835(0x1cd));}catch(_0x36b50c){alert(_0x418835(0x1cd));}}),chatSearch[_0x5bdf52(0x172)](_0x5bdf52(0x1bf),renderChats),refreshQrBtn[_0x5bdf52(0x172)](_0x5bdf52(0x192),async()=>{const _0xa6d757=_0x5bdf52;try{const _0x1ea8b0=await fetch(API_BASE+_0xa6d757(0x184)),_0x29e166=await _0x1ea8b0[_0xa6d757(0x17e)]();_0x29e166[_0xa6d757(0x1aa)]&&(qrImage['src']=_0x29e166[_0xa6d757(0x1aa)],qrImage[_0xa6d757(0x186)][_0xa6d757(0x1d2)]=_0xa6d757(0x193),qrPlaceholder[_0xa6d757(0x186)][_0xa6d757(0x1d2)]='none',qrHelp['textContent']=_0xa6d757(0x1b2));}catch(_0x5b09db){}}),socket['on'](_0x5bdf52(0x1c7),_0x22f92b=>{const _0x4d3b49=_0x5bdf52;lastReadyState=!!_0x22f92b[_0x4d3b49(0x1a0)],setStatus(_0x22f92b[_0x4d3b49(0x1bc)]||_0x4d3b49(0x198),!!_0x22f92b[_0x4d3b49(0x1a0)]),_0x22f92b[_0x4d3b49(0x1a0)]&&loadChats();}),socket['on'](_0x5bdf52(0x1d5),_0x46b2a2=>{const _0xce1052=_0x5bdf52;_0x46b2a2?.['qrDataUrl']?(qrImage[_0xce1052(0x1bd)]=_0x46b2a2['qrDataUrl'],qrImage[_0xce1052(0x186)]['display']=_0xce1052(0x193),qrPlaceholder[_0xce1052(0x186)][_0xce1052(0x1d2)]=_0xce1052(0x1ca),qrHelp[_0xce1052(0x1ab)]=_0xce1052(0x1b2)):(qrImage['style'][_0xce1052(0x1d2)]=_0xce1052(0x1ca),qrPlaceholder['style'][_0xce1052(0x1d2)]=_0xce1052(0x1a2));}),socket['on'](_0x5bdf52(0x178),_0x17881d=>{allChats=_0x17881d||[],renderChats();}),socket['on']('wa-message',async _0x2ee5a4=>{activeChat&&_0x2ee5a4['chatId']===activeChat['id']&&await loadMessages(activeChat['id']),await loadChats();}),window['addEventListener']('DOMContentLoaded',async()=>{const _0x580a92=_0x5bdf52;setStatus(_0x580a92(0x1af),![]),qrImage[_0x580a92(0x186)][_0x580a92(0x1d2)]=_0x580a92(0x1ca),qrPlaceholder[_0x580a92(0x186)][_0x580a92(0x1d2)]=_0x580a92(0x1a2),qrPlaceholder[_0x580a92(0x1ab)]=_0x580a92(0x190),await loadChats(),setInterval(loadChats,0x1388);try{const _0x57d6b7=await fetch(API_BASE+_0x580a92(0x184)),_0x40c90c=await _0x57d6b7[_0x580a92(0x17e)]();_0x40c90c[_0x580a92(0x1aa)]&&(qrImage[_0x580a92(0x1bd)]=_0x40c90c[_0x580a92(0x1aa)],qrImage['style']['display']=_0x580a92(0x193),qrPlaceholder[_0x580a92(0x186)][_0x580a92(0x1d2)]='none');}catch(_0x4199ba){}});
+/*const API_BASE = 'http://localhost:3000';
+const socket = io(API_BASE);
+
+const statusText = document.getElementById('statusText');
+const connectionPill = document.getElementById('connectionPill');
+const qrImage = document.getElementById('qrImage');
+const qrPlaceholder = document.getElementById('qrPlaceholder');
+const qrHelp = document.getElementById('qrHelp');
+const refreshQrBtn = document.getElementById('refreshQrBtn');
+
+const chatSearch = document.getElementById('chatSearch');
+const chatList = document.getElementById('chatList');
+const chatTitle = document.getElementById('chatTitle');
+const chatMeta = document.getElementById('chatMeta');
+const messageArea = document.getElementById('messageArea');
+const messageForm = document.getElementById('messageForm');
+const messageInput = document.getElementById('messageInput');
+
+let allChats = [];
+let activeChat = null;
+let lastReadyState = false;
+
+function setStatus(text, ready) {
+  statusText.textContent = text;
+  connectionPill.textContent = ready ? 'Online' : 'Offline';
+  connectionPill.style.background = ready
+    ? 'rgba(37, 211, 102, 0.12)'
+    : 'rgba(255,255,255,0.08)';
+  connectionPill.style.color = ready ? '#7dffb2' : '#e9edef';
+
+  if (ready) {
+    qrImage.style.display = 'none';
+    qrPlaceholder.style.display = 'grid';
+    qrPlaceholder.textContent = 'Logged in';
+    qrHelp.textContent = 'Account connected successfully';
+  }
+}
+
+function initials(name) {
+  const value = String(name || 'Chat').trim();
+  const parts = value.split(' ').filter(Boolean);
+  if (parts.length === 0) return 'C';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function renderChats() {
+  const query = chatSearch.value.trim().toLowerCase();
+
+  const filtered = allChats.filter((chat) => {
+    const haystack = `${chat.name} ${chat.lastMessage}`.toLowerCase();
+    return haystack.includes(query);
+  });
+
+  chatList.innerHTML = '';
+
+  if (!filtered.length) {
+    chatList.innerHTML = lastReadyState
+      ? '<div class="muted">Chats are still syncing. Wait a few seconds and refresh.</div>'
+      : '<div class="muted">No chats found.</div>';
+    return;
+  }
+
+  filtered.forEach((chat) => {
+    const item = document.createElement('div');
+    item.className = `chat-item ${activeChat?.id === chat.id ? 'active' : ''}`;
+
+    item.innerHTML = `
+      <div class="avatar">${initials(chat.name)}</div>
+      <div class="chat-info">
+        <strong>${escapeHtml(chat.name)}</strong>
+        <p>${escapeHtml(chat.lastMessage || 'No messages yet')}</p>
+      </div>
+      ${chat.unreadCount ? `<div class="badge">${chat.unreadCount}</div>` : ''}
+    `;
+
+    item.addEventListener('click', () => selectChat(chat));
+    chatList.appendChild(item);
+  });
+}
+
+function renderMessages(messages) {
+  messageArea.innerHTML = '';
+
+  if (!messages || !messages.length) {
+    messageArea.innerHTML = '<div class="empty-state">No messages in this chat.</div>';
+    return;
+  }
+
+  messages.forEach((msg) => {
+    const div = document.createElement('div');
+    div.className = `msg ${msg.fromMe ? 'me' : 'other'}`;
+    div.innerHTML = `
+      <div>${escapeHtml(msg.body || '')}</div>
+      <span class="time">${msg.time || ''}</span>
+    `;
+    messageArea.appendChild(div);
+  });
+
+  messageArea.scrollTop = messageArea.scrollHeight;
+}
+
+async function loadChats() {
+  try {
+    const res = await fetch(`${API_BASE}/api/chats`);
+    const data = await res.json();
+
+    if (data.ok) {
+      lastReadyState = !!data.ready;
+      allChats = data.chats || [];
+      renderChats();
+
+      if (lastReadyState && allChats.length === 0) {
+        setStatus('Connected. Waiting for chat sync...', true);
+      }
+    }
+  } catch (error) {
+    chatList.innerHTML = '<div class="muted">Failed to load chats.</div>';
+  }
+}
+
+async function loadMessages(chatId) {
+  try {
+    const res = await fetch(`${API_BASE}/api/messages/${encodeURIComponent(chatId)}`);
+    const data = await res.json();
+
+    if (data.ok) {
+      renderMessages(data.messages || []);
+    } else {
+      messageArea.innerHTML = '<div class="empty-state">Could not load messages.</div>';
+    }
+  } catch (error) {
+    messageArea.innerHTML = '<div class="empty-state">Could not load messages.</div>';
+  }
+}
+
+async function selectChat(chat) {
+  activeChat = chat;
+  chatTitle.textContent = chat.name;
+  chatMeta.textContent = chat.isGroup ? 'Group chat' : 'Private chat';
+  messageInput.placeholder = `Message ${chat.name}`;
+  await loadMessages(chat.id);
+  renderChats();
+}
+
+messageForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!activeChat) {
+    alert('Select a chat first.');
+    return;
+  }
+
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chatId: activeChat.id,
+        text
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      messageInput.value = '';
+      await loadMessages(activeChat.id);
+      await loadChats();
+    } else {
+      alert(data.message || 'Message failed.');
+    }
+  } catch (error) {
+    alert('Message failed.');
+  }
+});
+
+chatSearch.addEventListener('input', renderChats);
+
+refreshQrBtn.addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/qr`);
+    const data = await res.json();
+
+    if (data.qrDataUrl) {
+      qrImage.src = data.qrDataUrl;
+      qrImage.style.display = 'block';
+      qrPlaceholder.style.display = 'none';
+      qrHelp.textContent = 'Scan this QR in WhatsApp > Linked devices';
+    }
+  } catch (error) {}
+});
+
+socket.on('wa-status', (data) => {
+  lastReadyState = !!data.ready;
+  setStatus(data.text || 'Connected', !!data.ready);
+
+  if (data.ready) {
+    loadChats();
+  }
+});
+
+socket.on('wa-qr', (data) => {
+  if (data?.qrDataUrl) {
+    qrImage.src = data.qrDataUrl;
+    qrImage.style.display = 'block';
+    qrPlaceholder.style.display = 'none';
+    qrHelp.textContent = 'Scan this QR in WhatsApp > Linked devices';
+  } else {
+    qrImage.style.display = 'none';
+    qrPlaceholder.style.display = 'grid';
+  }
+});
+
+socket.on('wa-chats', (chats) => {
+  allChats = chats || [];
+  renderChats();
+});
+
+socket.on('wa-message', async (message) => {
+  if (activeChat && message.chatId === activeChat.id) {
+    await loadMessages(activeChat.id);
+  }
+  await loadChats();
+});
+
+window.addEventListener('DOMContentLoaded', async () => {
+  setStatus('Connecting...', false);
+  qrImage.style.display = 'none';
+  qrPlaceholder.style.display = 'grid';
+  qrPlaceholder.textContent = 'Waiting for QR...';
+
+  await loadChats();
+  setInterval(loadChats, 5000);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/qr`);
+    const data = await res.json();
+    if (data.qrDataUrl) {
+      qrImage.src = data.qrDataUrl;
+      qrImage.style.display = 'block';
+      qrPlaceholder.style.display = 'none';
+    }
+  } catch (error) {}
+});
+*/
+
+
+const API_BASE = 'http://localhost:3000';
+const socket = io(API_BASE);
+
+const statusText = document.getElementById('statusText');
+const connectionDot = document.getElementById('connectionDot');
+const unreadBadge = document.getElementById('unreadBadge');
+
+const qrPanel = document.getElementById('qrPanel');
+const qrImage = document.getElementById('qrImage');
+const qrPlaceholder = document.getElementById('qrPlaceholder');
+const qrHelp = document.getElementById('qrHelp');
+const refreshQrBtn = document.getElementById('refreshQrBtn');
+const manualRefreshBtn = document.getElementById('manualRefreshBtn');
+
+const chatSearch = document.getElementById('chatSearch');
+const chatList = document.getElementById('chatList');
+
+const chatListView = document.getElementById('chatListView');
+const chatView = document.getElementById('chatView');
+const backBtn = document.getElementById('backBtn');
+
+const chatAvatar = document.getElementById('chatAvatar');
+const chatTitle = document.getElementById('chatTitle');
+const chatMeta = document.getElementById('chatMeta');
+const messageArea = document.getElementById('messageArea');
+
+const messageForm = document.getElementById('messageForm');
+const messageInput = document.getElementById('messageInput');
+const fabBtn = document.getElementById('fabBtn');
+
+let allChats = [];
+let activeChat = null;
+let isReady = false;
+let chatPollTimer = null;
+let qrPollTimer = null;
+let hasShownLoggedIn = false;
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text ?? '';
+  return div.innerHTML;
+}
+
+function initials(name) {
+  const value = String(name || 'Chat').trim();
+  const parts = value.split(' ').filter(Boolean);
+  if (!parts.length) return 'W';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+function timeLabel(timestamp) {
+  if (!timestamp) return '';
+  const str = String(timestamp);
+  return str.length >= 5 ? str.slice(0, 5) : str;
+}
+
+function setConnection(ready, text) {
+  isReady = !!ready;
+  statusText.textContent = text || (ready ? 'Connected and ready' : 'Connecting...');
+  connectionDot.className = `dot ${ready ? 'online' : 'offline'}`;
+
+  if (ready) {
+    qrPanel.classList.add('hidden-panel');
+    if (!hasShownLoggedIn) {
+      qrPlaceholder.textContent = 'Logged in';
+      qrHelp.textContent = 'Account connected successfully';
+      hasShownLoggedIn = true;
+    }
+    qrImage.style.display = 'none';
+  } else {
+    qrPanel.classList.remove('hidden-panel');
+  }
+}
+
+function setView(view) {
+  if (view === 'chat') {
+    chatListView.classList.add('hidden');
+    chatView.classList.add('show');
+  } else {
+    chatView.classList.remove('show');
+    chatListView.classList.remove('hidden');
+  }
+}
+
+function renderChats() {
+  const query = chatSearch.value.trim().toLowerCase();
+
+  const filtered = allChats.filter((chat) => {
+    const hay = `${chat.name} ${chat.lastMessage}`.toLowerCase();
+    return hay.includes(query);
+  });
+
+  unreadBadge.textContent = String(
+    filtered.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0)
+  );
+
+  chatList.innerHTML = '';
+
+  if (!filtered.length) {
+    chatList.innerHTML = isReady
+      ? '<div class="empty-state">Chats are still syncing. Please wait a moment.</div>'
+      : '<div class="empty-state">No chats found.</div>';
+    return;
+  }
+
+  filtered.forEach((chat) => {
+    const item = document.createElement('div');
+    item.className = `chat-item ${activeChat?.id === chat.id ? 'active' : ''}`;
+
+    item.innerHTML = `
+      <div class="avatar">${escapeHtml(initials(chat.name))}</div>
+      <div class="chat-info">
+        <div class="chat-name-row">
+          <div class="chat-name">${escapeHtml(chat.name)}</div>
+          <div class="chat-time">${escapeHtml(timeLabel(chat.timestamp))}</div>
+        </div>
+        <div class="chat-preview">${escapeHtml(chat.lastMessage || 'No messages yet')}</div>
+      </div>
+      ${chat.unreadCount ? `<div class="unread">${chat.unreadCount > 99 ? '99+' : chat.unreadCount}</div>` : ''}
+    `;
+
+    item.addEventListener('click', () => selectChat(chat));
+    chatList.appendChild(item);
+  });
+}
+
+function renderMessages(messages) {
+  messageArea.innerHTML = '';
+
+  if (!messages || !messages.length) {
+    messageArea.innerHTML = '<div class="empty-state">No messages in this chat.</div>';
+    return;
+  }
+
+  messages.forEach((msg) => {
+    const bubble = document.createElement('div');
+    bubble.className = `msg ${msg.fromMe ? 'me' : 'other'}`;
+    bubble.innerHTML = `
+      <div>${escapeHtml(msg.body || '')}</div>
+      <span class="time">${escapeHtml(msg.time || '')}</span>
+    `;
+    messageArea.appendChild(bubble);
+  });
+
+  messageArea.scrollTop = messageArea.scrollHeight;
+}
+
+async function loadChats(silent = false) {
+  try {
+    if (!silent) {
+      if (!isReady) {
+        chatList.innerHTML = '<div class="empty-state">Connecting to your account...</div>';
+      } else if (!allChats.length) {
+        chatList.innerHTML = '<div class="empty-state">Syncing chats...</div>';
+      }
+    }
+
+    const res = await fetch(`${API_BASE}/api/chats`);
+    const data = await res.json();
+
+    if (data.ok) {
+      isReady = !!data.ready;
+      allChats = Array.isArray(data.chats) ? data.chats : [];
+
+      if (isReady && !allChats.length) {
+        chatList.innerHTML = '<div class="empty-state">Syncing chats...</div>';
+      }
+
+      renderChats();
+
+      if (activeChat) {
+        const updated = allChats.find((c) => c.id === activeChat.id);
+        if (updated) activeChat = updated;
+      }
+    }
+  } catch (error) {
+    if (!silent) {
+      chatList.innerHTML = '<div class="empty-state">Failed to load chats.</div>';
+    }
+  }
+}
+
+async function loadMessages(chatId) {
+  try {
+    messageArea.innerHTML = '<div class="empty-state">Loading messages...</div>';
+
+    const res = await fetch(`${API_BASE}/api/messages/${encodeURIComponent(chatId)}`);
+    const data = await res.json();
+
+    if (data.ok) {
+      renderMessages(data.messages || []);
+    } else {
+      messageArea.innerHTML = `<div class="empty-state">${escapeHtml(data.message || 'Could not load messages.')}</div>`;
+    }
+  } catch (error) {
+    messageArea.innerHTML = '<div class="empty-state">Could not load messages.</div>';
+  }
+}
+
+async function selectChat(chat) {
+  activeChat = chat;
+  chatAvatar.textContent = initials(chat.name);
+  chatTitle.textContent = chat.name;
+  chatMeta.textContent = chat.isGroup ? 'Group chat' : 'Private chat';
+  messageInput.placeholder = `Message ${chat.name}`;
+  setView('chat');
+  await loadMessages(chat.id);
+  renderChats();
+}
+
+function stopPolling() {
+  if (chatPollTimer) clearInterval(chatPollTimer);
+  if (qrPollTimer) clearInterval(qrPollTimer);
+  chatPollTimer = null;
+  qrPollTimer = null;
+}
+
+function startChatPolling() {
+  if (chatPollTimer) clearInterval(chatPollTimer);
+
+  const poll = async () => {
+    if (!isReady) return;
+    await loadChats(true);
+  };
+
+  chatPollTimer = setInterval(poll, 3000);
+  poll();
+}
+
+function startQrPolling() {
+  if (qrPollTimer) clearInterval(qrPollTimer);
+
+  const poll = async () => {
+    if (isReady) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/qr`);
+      const data = await res.json();
+
+      if (data.qrDataUrl) {
+        qrImage.src = data.qrDataUrl;
+        qrImage.style.display = 'block';
+        qrPlaceholder.style.display = 'none';
+        qrHelp.textContent = 'Scan this QR in WhatsApp → Linked devices';
+        qrPanel.classList.remove('hidden-panel');
+      } else {
+        qrImage.style.display = 'none';
+        qrPlaceholder.style.display = 'grid';
+        qrPlaceholder.textContent = 'Waiting for QR...';
+      }
+    } catch (error) {}
+  };
+
+  qrPollTimer = setInterval(poll, 4000);
+  poll();
+}
+
+messageForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!activeChat) return;
+
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chatId: activeChat.id,
+        text
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      messageInput.value = '';
+      await loadMessages(activeChat.id);
+      await loadChats(true);
+    } else {
+      alert(data.message || 'Message failed.');
+    }
+  } catch (error) {
+    alert('Message failed.');
+  }
+});
+
+chatSearch.addEventListener('input', renderChats);
+
+refreshQrBtn.addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/qr`);
+    const data = await res.json();
+
+    if (data.qrDataUrl && !isReady) {
+      qrImage.src = data.qrDataUrl;
+      qrImage.style.display = 'block';
+      qrPlaceholder.style.display = 'none';
+      qrPanel.classList.remove('hidden-panel');
+      qrHelp.textContent = 'Scan this QR in WhatsApp → Linked devices';
+    }
+  } catch (error) {}
+});
+
+manualRefreshBtn.addEventListener('click', () => {
+  loadChats(false);
+});
+
+backBtn.addEventListener('click', () => {
+  activeChat = null;
+  setView('list');
+});
+
+fabBtn.addEventListener('click', () => {
+  setView('list');
+  chatSearch.focus();
+});
+
+socket.on('wa-status', (data) => {
+  setConnection(!!data.ready, data.text || 'Connecting...');
+
+  if (data.ready) {
+    qrImage.style.display = 'none';
+    qrPlaceholder.style.display = 'grid';
+    qrPlaceholder.textContent = 'Logged in';
+    qrHelp.textContent = 'Account connected successfully';
+    qrPanel.classList.add('hidden-panel');
+
+    startChatPolling();
+    loadChats(true);
+  } else {
+    qrPanel.classList.remove('hidden-panel');
+    startQrPolling();
+  }
+});
+
+socket.on('wa-qr', (data) => {
+  if (isReady) return;
+
+  if (data?.qrDataUrl) {
+    qrImage.src = data.qrDataUrl;
+    qrImage.style.display = 'block';
+    qrPlaceholder.style.display = 'none';
+    qrHelp.textContent = 'Scan this QR in WhatsApp → Linked devices';
+    qrPanel.classList.remove('hidden-panel');
+  } else {
+    qrImage.style.display = 'none';
+    qrPlaceholder.style.display = 'grid';
+    qrPlaceholder.textContent = 'Waiting for QR...';
+  }
+});
+
+socket.on('wa-chats', (chats) => {
+  if (Array.isArray(chats)) {
+    allChats = chats;
+    renderChats();
+  }
+});
+
+socket.on('wa-message', async (message) => {
+  if (activeChat && message.chatId === activeChat.id) {
+    await loadMessages(activeChat.id);
+  }
+  await loadChats(true);
+});
+
+window.addEventListener('DOMContentLoaded', async () => {
+  setView('list');
+  setConnection(false, 'Connecting...');
+  qrPlaceholder.style.display = 'grid';
+  qrImage.style.display = 'none';
+
+  await loadChats(false);
+  startQrPolling();
+
+  setInterval(() => {
+    if (isReady) {
+      loadChats(true);
+    }
+  }, 5000);
+});
