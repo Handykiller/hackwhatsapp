@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const { Server } = require('socket.io');
 const QRCode = require('qrcode');
+const puppeteer = require('puppeteer');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const PORT = process.env.PORT || 3000;
@@ -26,12 +27,32 @@ let activeClientInfo = null;
 let currentState = 'UNKNOWN';
 let loadingChats = false;
 
+function getChromeExecutablePath() {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+
+  if (process.env.CHROME_BIN) {
+    return process.env.CHROME_BIN;
+  }
+
+  try {
+    return puppeteer.executablePath();
+  } catch (error) {
+    console.error('Could not resolve Chrome executable path:', error.message);
+    return undefined;
+  }
+}
+
+const chromeExecutablePath = getChromeExecutablePath();
+
 const client = new Client({
   authStrategy: new LocalAuth({
     clientId: 'wa-portal'
   }),
   puppeteer: {
     headless: true,
+    executablePath: chromeExecutablePath,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     protocolTimeout: 300000
   },
@@ -236,7 +257,8 @@ app.get('/api/health', async (req, res) => {
     state: currentState,
     statusText,
     info: activeClientInfo,
-    chatsCount: chatsCache.length
+    chatsCount: chatsCache.length,
+    chromeExecutablePath: chromeExecutablePath || null
   });
 });
 
@@ -332,8 +354,24 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-client.initialize();
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION:', err);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+  console.log('Chrome executable path:', chromeExecutablePath || 'not found yet');
 });
+
+(async () => {
+  try {
+    await client.initialize();
+  } catch (err) {
+    console.error('CLIENT INITIALIZE FAILED:', err);
+    emitStatus(`Client initialize failed: ${err.message}`);
+  }
+})();
