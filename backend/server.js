@@ -5,9 +5,11 @@ const path = require('path');
 const { Server } = require('socket.io');
 const QRCode = require('qrcode');
 const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const PORT = process.env.PORT || 3000;
+const IS_RENDER = !!process.env.RENDER;
 
 const app = express();
 const server = http.createServer(app);
@@ -19,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+let client;
 let clientReady = false;
 let statusText = 'Starting WhatsApp client...';
 let qrDataUrl = '';
@@ -26,40 +29,6 @@ let chatsCache = [];
 let activeClientInfo = null;
 let currentState = 'UNKNOWN';
 let loadingChats = false;
-
-function getChromeExecutablePath() {
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    return process.env.PUPPETEER_EXECUTABLE_PATH;
-  }
-
-  if (process.env.CHROME_BIN) {
-    return process.env.CHROME_BIN;
-  }
-
-  try {
-    return puppeteer.executablePath();
-  } catch (error) {
-    console.error('Could not resolve Chrome executable path:', error.message);
-    return undefined;
-  }
-}
-
-const chromeExecutablePath = getChromeExecutablePath();
-
-const client = new Client({
-  authStrategy: new LocalAuth({
-    clientId: 'wa-portal'
-  }),
-  puppeteer: {
-    headless: true,
-    executablePath: chromeExecutablePath,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    protocolTimeout: 300000
-  },
-  authTimeoutMs: 60000,
-  takeoverOnConflict: true,
-  takeoverTimeoutMs: 0
-});
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -113,6 +82,7 @@ function simplifyMessage(message) {
 
 async function safeGetState() {
   try {
+    if (!client) return 'UNKNOWN';
     currentState = await client.getState();
   } catch (error) {
     currentState = 'UNKNOWN';
@@ -121,7 +91,7 @@ async function safeGetState() {
 }
 
 async function loadChatsOnce() {
-  if (!clientReady || loadingChats) return chatsCache;
+  if (!clientReady || loadingChats || !client) return chatsCache;
 
   loadingChats = true;
   try {
@@ -158,76 +128,125 @@ async function loadChatsWithRetry(retries = 6, waitMs = 5000) {
   return chatsCache;
 }
 
-client.on('qr', async (qr) => {
-  try {
-    qrDataUrl = await QRCode.toDataURL(qr, {
-      margin: 1,
-      scale: 8
-    });
+function attachClientEvents() {
+  client.on('qr', async (qr) => {
+    try {
+      qrDataUrl = await QRCode.toDataURL(qr, {
+        margin: 1,
+        scale: 8
+      });
 
-    io.emit('wa-qr', {
-      ok: true,
-      qrDataUrl
-    });
+      io.emit('wa-qr', {
+        ok: true,
+        qrDataUrl
+      });
 
-    clientReady = false;
-    currentState = 'PAIRING';
-    emitStatus('Scan the QR code in WhatsApp > Linked devices');
-  } catch (error) {
-    emitStatus(`QR generation failed: ${error.message}`);
-  }
-});
-
-client.on('authenticated', () => {
-  emitStatus('Authenticated. Loading chats...');
-});
-
-client.on('ready', async () => {
-  clientReady = true;
-  activeClientInfo = client.info || null;
-  currentState = 'CONNECTED';
-  emitStatus('Connected and ready');
-
-  qrDataUrl = '';
-  io.emit('wa-qr', {
-    ok: true,
-    qrDataUrl: ''
+      clientReady = false;
+      currentState = 'PAIRING';
+      emitStatus('Scan the QR code in WhatsApp > Linked devices');
+    } catch (error) {
+      emitStatus(`QR generation failed: ${error.message}`);
+    }
   });
 
-  await delay(7000);
-  await loadChatsWithRetry(8, 4000);
-});
+  client.on('authenticated', () => {
+    emitStatus('Authenticated. Loading chats...');
+  });
 
-client.on('change_state', async (state) => {
-  currentState = state;
-  emitStatus(`State: ${state}`);
+  client.on('ready', async () => {
+    clientReady = true;
+    activeClientInfo = client.info || null;
+    currentState = 'CONNECTED';
+    emitStatus('Connected and ready');
 
-  if (state === 'CONNECTED' && clientReady) {
-    await loadChatsWithRetry(4, 3000);
+    qrDataUrl = '';
+    io.emit('wa-qr', {
+      ok: true,
+      qrDataUrl: ''
+    });
+
+    await delay(7000);
+    await loadChatsWithRetry(8, 4000);
+  });
+
+  client.on('change_state', async (state) => {
+    currentState = state;
+    emitStatus(`State: ${state}`);
+
+    if (state === 'CONNECTED' && clientReady) {
+      await loadChatsWithRetry(4, 3000);
+    }
+  });
+
+  client.on('auth_failure', (message) => {
+    clientReady = false;
+    currentState = 'UNPAIRED';
+    emitStatus(`Authentication failed: ${message}`);
+  });
+
+  client.on('disconnected', (reason) => {
+    clientReady = false;
+    currentState = 'DISCONNECTED';
+    chatsCache = [];
+    activeClientInfo = null;
+    emitStatus(`Disconnected: ${reason}`);
+    io.emit('wa-chats', []);
+  });
+
+  client.on('message', async (message) => {
+    io.emit('wa-message', simplifyMessage(message));
+    if (clientReady) {
+      loadChatsOnce().catch(() => {});
+    }
+  });
+}
+
+async function buildPuppeteerOptions() {
+  if (IS_RENDER) {
+    const executablePath = await chromium.executablePath();
+
+    return {
+      headless: chromium.headless,
+      executablePath,
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ],
+      protocolTimeout: 300000
+    };
   }
-});
 
-client.on('auth_failure', (message) => {
-  clientReady = false;
-  currentState = 'UNPAIRED';
-  emitStatus(`Authentication failed: ${message}`);
-});
+  return {
+    headless: true,
+    executablePath: puppeteer.executablePath(),
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    protocolTimeout: 300000
+  };
+}
 
-client.on('disconnected', (reason) => {
-  clientReady = false;
-  currentState = 'DISCONNECTED';
-  chatsCache = [];
-  activeClientInfo = null;
-  emitStatus(`Disconnected: ${reason}`);
-  io.emit('wa-chats', []);
-});
+async function startWhatsAppClient() {
+  const puppeteerOptions = await buildPuppeteerOptions();
 
-client.on('message', async (message) => {
-  io.emit('wa-message', simplifyMessage(message));
-  if (clientReady) {
-    loadChatsOnce().catch(() => {});
+  client = new Client({
+    authStrategy: new LocalAuth({
+      clientId: 'wa-portal'
+    }),
+    puppeteer: puppeteerOptions,
+    authTimeoutMs: 60000,
+    takeoverOnConflict: true,
+    takeoverTimeoutMs: 0
+  });
+
+  attachClientEvents();
+
+  try {
+    await client.initialize();
+  } catch (error) {
+    console.error('CLIENT INITIALIZE FAILED:', error);
+    emitStatus(`Client initialize failed: ${error.message}`);
   }
-});
+}
 
 io.on('connection', (socket) => {
   socket.emit('wa-status', {
@@ -257,8 +276,7 @@ app.get('/api/health', async (req, res) => {
     state: currentState,
     statusText,
     info: activeClientInfo,
-    chatsCount: chatsCache.length,
-    chromeExecutablePath: chromeExecutablePath || null
+    chatsCount: chatsCache.length
   });
 });
 
@@ -364,14 +382,6 @@ process.on('uncaughtException', (err) => {
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-  console.log('Chrome executable path:', chromeExecutablePath || 'not found yet');
 });
 
-(async () => {
-  try {
-    await client.initialize();
-  } catch (err) {
-    console.error('CLIENT INITIALIZE FAILED:', err);
-    emitStatus(`Client initialize failed: ${err.message}`);
-  }
-})();
+startWhatsAppClient();
