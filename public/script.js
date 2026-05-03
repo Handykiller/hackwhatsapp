@@ -255,7 +255,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 */
 
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://hackwhatsapp.onrender.com';
 const socket = io(API_BASE);
 
 const statusText = document.getElementById('statusText');
