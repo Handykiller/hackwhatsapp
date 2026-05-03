@@ -4,12 +4,10 @@ const cors = require('cors');
 const path = require('path');
 const { Server } = require('socket.io');
 const QRCode = require('qrcode');
-const puppeteer = require('puppeteer');
 const chromium = require('@sparticuz/chromium');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const PORT = process.env.PORT || 3000;
-const IS_RENDER = !!process.env.RENDER;
 
 const app = express();
 const server = http.createServer(app);
@@ -21,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-let client;
+let client = null;
 let clientReady = false;
 let statusText = 'Starting WhatsApp client...';
 let qrDataUrl = '';
@@ -128,6 +126,22 @@ async function loadChatsWithRetry(retries = 6, waitMs = 5000) {
   return chatsCache;
 }
 
+async function buildPuppeteerOptions() {
+  const executablePath = await chromium.executablePath();
+
+  return {
+    headless: true,
+    executablePath,
+    args: [
+      ...chromium.args,
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
+    ],
+    protocolTimeout: 300000
+  };
+}
+
 function attachClientEvents() {
   client.on('qr', async (qr) => {
     try {
@@ -201,46 +215,21 @@ function attachClientEvents() {
   });
 }
 
-async function buildPuppeteerOptions() {
-  if (IS_RENDER) {
-    const executablePath = await chromium.executablePath();
-
-    return {
-      headless: chromium.headless,
-      executablePath,
-      args: [
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox'
-      ],
-      protocolTimeout: 300000
-    };
-  }
-
-  return {
-    headless: true,
-    executablePath: puppeteer.executablePath(),
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    protocolTimeout: 300000
-  };
-}
-
 async function startWhatsAppClient() {
-  const puppeteerOptions = await buildPuppeteerOptions();
-
-  client = new Client({
-    authStrategy: new LocalAuth({
-      clientId: 'wa-portal'
-    }),
-    puppeteer: puppeteerOptions,
-    authTimeoutMs: 60000,
-    takeoverOnConflict: true,
-    takeoverTimeoutMs: 0
-  });
-
-  attachClientEvents();
-
   try {
+    const puppeteerOptions = await buildPuppeteerOptions();
+
+    client = new Client({
+      authStrategy: new LocalAuth({
+        clientId: 'wa-portal'
+      }),
+      puppeteer: puppeteerOptions,
+      authTimeoutMs: 60000,
+      takeoverOnConflict: true,
+      takeoverTimeoutMs: 0
+    });
+
+    attachClientEvents();
     await client.initialize();
   } catch (error) {
     console.error('CLIENT INITIALIZE FAILED:', error);
